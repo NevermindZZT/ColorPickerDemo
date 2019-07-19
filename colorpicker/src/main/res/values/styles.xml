@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="ColorPickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@drawable/bg_color_picker_dialog</item>
+    </style>
+
+</resources>
