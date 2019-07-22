@@ -15,8 +15,7 @@ import android.widget.Button
  * @version 1.0
  */
 class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
-        View.OnClickListener,
-        ColorPickerView.OnColorClickListener {
+        View.OnClickListener {
 
     private var colorPickerMain: ColorPickerView                    /* 颜色选择器主视图 */
     private var colorPickerSub: ColorPickerView                     /* 颜色选择器副视图 */
@@ -27,7 +26,7 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
 
     private var colors: ArrayList<Int> = arrayListOf(0, 0, 0, 0)    /* 副视图颜色 */
 
-    private var onColorSelectListener: OnColorSelectListener? = null    /* 监听 */
+    private var onColorSelectListener: ((color: Int)-> Unit)? = null    /* 监听 */
 
     init {
         val view =  LayoutInflater.from(context).inflate(R.layout.dialog_color_picker, null)
@@ -43,10 +42,10 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
         negativeButton.setOnClickListener(this)
 
         colorPickerMain.setWidthWrapContent()
-        colorPickerMain.onColorClickListener = this
+        colorPickerMain.onColorClickListener = ::onColorClick
 
         colorPickerSub.setWidthWrapContent()
-        colorPickerSub.onColorClickListener = this
+        colorPickerSub.onColorClickListener = ::onColorClick
     }
 
     constructor(context: Context): this(context, R.style.ColorPickerDialogTheme)
@@ -64,7 +63,7 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
     override fun onClick(v: View?) {
         when (v) {
             positiveButton -> {
-                onColorSelectListener?.onColorSelect(selectColor)
+                onColorSelectListener?.invoke(selectColor)
                 dismiss()
             }
             negativeButton -> {
@@ -73,7 +72,12 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
         }
     }
 
-    override fun onColorClick(view: View, color: Int) {
+    /**
+     * 颜色盘点击时间处理
+     * @param view View
+     * @param color 被点击的颜色
+     */
+    fun onColorClick(view: View, color: Int) {
         when (view) {
             colorPickerMain -> {
                 freshColorPickerSub(color, colors.size + 1)
@@ -86,6 +90,11 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
         }
     }
 
+    /**
+     * 刷新颜色副视图
+     * @param color 颜色
+     * @param level 颜色划分等级
+     */
     private fun freshColorPickerSub(color: Int, level: Int) {
         Log.d("Color", "color:$color")
         val stepR = (0XFF - color.and(0x00FF0000).ushr(16)) / level
@@ -99,17 +108,25 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
         colorPickerSub.setColors(colors)
     }
 
+    /**
+     * 设置颜色资源
+     * @param colorStrings 颜色资源字符串List
+     */
     fun setColors(colorStrings: Array<String>) {
         colorPickerMain.setColors(colorStrings)
     }
 
+    /**
+     * 设置颜色资源
+     * @param colors 颜色资源List
+     */
     fun setColors(colors: ArrayList<Int>) {
         colorPickerMain.setColors(colors)
     }
 
     class Builder(var context: Context) {
         private var theme = R.style.ColorPickerDialogTheme
-        private var onColorSelectListener: OnColorSelectListener? = null
+        private var onColorSelectListener: ((color: Int)-> Unit)? = null
         private var color = 0
         private var colors = arrayListOf<Int>()
 
@@ -122,11 +139,11 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
             return theme
         }
 
-        fun getOnColorSelectListener(): OnColorSelectListener? {
+        fun getOnColorSelectListener(): ((color: Int)-> Unit)? {
             return onColorSelectListener
         }
 
-        fun setOnColorSelectListener(onColorSelectListener: OnColorSelectListener): Builder {
+        fun setOnColorSelectListener(onColorSelectListener: ((color: Int)-> Unit)): Builder {
             this.onColorSelectListener = onColorSelectListener
             return this
         }
@@ -161,7 +178,4 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
         }
     }
 
-    interface OnColorSelectListener {
-        fun onColorSelect(color: Int)
-    }
 }

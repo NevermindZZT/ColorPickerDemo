@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.Button
 import com.letter.colorpicker.ColorPickerDialog
 
-class MainActivity : AppCompatActivity(), View.OnClickListener, ColorPickerDialog.OnColorSelectListener {
+class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private var button: Button? = null
 
@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ColorPickerDialo
         when (v) {
             button -> {
                 val dialog = ColorPickerDialog.Builder(this)
-                    .setOnColorSelectListener(this)
+                    .setOnColorSelectListener{}
                     .setColor(0)
                     .setColors(resources.getStringArray(R.array.color_picker_values))
                     .create()
@@ -31,7 +31,4 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ColorPickerDialo
         }
     }
 
-    override fun onColorSelect(color: Int) {
-
-    }
 }

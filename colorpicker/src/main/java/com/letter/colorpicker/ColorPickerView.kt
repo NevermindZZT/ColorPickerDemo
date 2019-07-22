@@ -3,11 +3,9 @@ package com.letter.colorpicker
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.GridView
-import android.widget.LinearLayout
 
 /**
  * @author Letter(zhangkeqiang@ut.cn)
@@ -15,10 +13,8 @@ import android.widget.LinearLayout
  */
 class ColorPickerView @JvmOverloads
 constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int, defStyleRes: Int):
-    LinearLayout(context, attrs, defStyleAttr, defStyleRes),
+    GridView(context, attrs, defStyleAttr, defStyleRes),
     AdapterView.OnItemClickListener {
-
-    private var gridView: GridView? = null
 
     private var colorPaneSize: Float
     private var colorPaneStroke: Int
@@ -27,11 +23,11 @@ constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int, defS
     var selectedItem = 0
         set(value) {
             field = value
-            (gridView?.adapter?.getItem(value) as ColorPane).checked = true
+            (this.adapter?.getItem(value) as ColorPane).checked = true
         }
     private var viewWidth = 0f
 
-    var onColorClickListener: OnColorClickListener? = null
+    var onColorClickListener: ((view: View, color: Int) -> Unit)? = null
 
     constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int):
             this(context, attrs, defStyleAttr, 0)
@@ -43,10 +39,6 @@ constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int, defS
             this(context, null, 0, 0)
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.layout_color_pick_view, this)
-
-        gridView = findViewById(R.id.grid_view)
-
         val attrArray = context.obtainStyledAttributes(attrs, R.styleable.ColorPickerView)
 
         val colorResourceId = attrArray.getResourceId(R.styleable.ColorPickerView_colorResource, 0)
@@ -65,50 +57,57 @@ constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int, defS
             val colorStrings = context.resources.getStringArray(colorResourceId)
             setColors(colorStrings)
         }
-        gridView?.onItemClickListener = this
-        gridView?.columnWidth = colorPaneSize.toInt()
-        gridView?.horizontalSpacing = horizontalSpacing.toInt()
-        gridView?.verticalSpacing = verticalSpacing.toInt()
+        this.onItemClickListener = this
+        this.columnWidth = colorPaneSize.toInt()
+        this.horizontalSpacing = horizontalSpacing.toInt()
+        this.verticalSpacing = verticalSpacing.toInt()
         if (numColumns != 0) {
-            gridView?.numColumns = numColumns
+            this.numColumns = numColumns
         }
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        (gridView?.adapter?.getItem(selectedItem) as ColorPane).checked = false
-        (gridView?.adapter?.getItem(position) as ColorPane).checked = true
-        selectedColor = (gridView?.adapter?.getItem(position) as ColorPane).color
-        this.onColorClickListener?.onColorClick(this, selectedColor)
+        (this.adapter?.getItem(selectedItem) as ColorPane).checked = false
+        (this.adapter?.getItem(position) as ColorPane).checked = true
+        selectedColor = (this.adapter?.getItem(position) as ColorPane).color
+        this.onColorClickListener?.invoke(this, selectedColor)
         selectedItem = position
     }
 
+    /**
+     * 设置颜色资源
+     * @param colorStrings 添加的颜色字符串List
+     */
     fun setColors(colorStrings: Array<String>) {
         val colors = arrayListOf<Int>()
         for (colorString in colorStrings) {
             colors.add(Color.parseColor(colorString))
         }
-        gridView?.adapter = ColorPickerListAdapter(context, colors, colorPaneSize.toInt(), colorPaneStroke)
+        this.adapter = ColorPickerListAdapter(context, colors, colorPaneSize.toInt(), colorPaneStroke)
     }
 
+    /**
+     * 设置颜色资源
+     * @param colors 添加的颜色List
+     */
     fun setColors(colors: ArrayList<Int>) {
-        gridView?.adapter = ColorPickerListAdapter(context, colors, colorPaneSize.toInt(), colorPaneStroke)
+        this.adapter = ColorPickerListAdapter(context, colors, colorPaneSize.toInt(), colorPaneStroke)
     }
 
+    /**
+     * 取消当前被选择的颜色
+     */
     fun cancelSelect() {
-        (gridView?.adapter?.getItem(selectedItem) as ColorPane).checked = false
+        (this.adapter?.getItem(selectedItem) as ColorPane).checked = false
     }
 
+    /**
+     * 设置View为宽度自适应
+     */
     fun setWidthWrapContent() {
-        layoutParams = gridView?.layoutParams
+        layoutParams = this.layoutParams
         layoutParams.width = viewWidth.toInt()
-        gridView?.layoutParams = layoutParams
+        this.layoutParams = layoutParams
     }
 
-    fun getAdapter(): ColorPickerListAdapter? {
-        return gridView?.adapter as ColorPickerListAdapter
-    }
-
-    interface OnColorClickListener {
-        fun onColorClick(view: View, color: Int)
-    }
 }

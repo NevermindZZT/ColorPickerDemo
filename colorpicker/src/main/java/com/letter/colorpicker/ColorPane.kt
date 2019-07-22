@@ -9,6 +9,7 @@ import android.view.View
 import kotlin.math.min
 
 /**
+ * 颜色盘View
  * @author Letter(zhangkeqiang@ut.cn)
  * @version 1.0
  */
@@ -51,6 +52,10 @@ class ColorPane @JvmOverloads
         attrArray.recycle()
     }
 
+    /**
+     * 绘制View
+     * @param canvas 画布
+     */
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
