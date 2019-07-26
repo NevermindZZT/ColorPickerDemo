@@ -48,6 +48,7 @@ class ColorPane @JvmOverloads
         color = attrArray.getColor(R.styleable.ColorPane_color, 0)
         strokeColor = attrArray.getColor(R.styleable.ColorPane_strokeColor, 0)
         strokeWidth = attrArray.getDimension(R.styleable.ColorPane_strokeWidth, 0f)
+        checked = attrArray.getBoolean(R.styleable.ColorPane_checked, false)
 
         attrArray.recycle()
     }
@@ -82,17 +83,39 @@ class ColorPane @JvmOverloads
             } else {
                 paint.color = Color.WHITE
             }
-            val lineWidth = height.toFloat() / 20
-            val offsetX = -width.toFloat() / 32
-            val offsetY = height.toFloat() / 8
+            val diameter = min(width, height)
+            val lineWidth = diameter.toFloat() / 20
+            val offsetX = -diameter.toFloat() / 32 + (if (width > height) (width - height) / 2 else 0)
+            val offsetY = diameter.toFloat() / 8 + (if (height > width) (height - width) / 2 else 0)
             paint.style = Paint.Style.STROKE
             paint.strokeWidth = lineWidth
-            canvas?.drawLine(width.toFloat() / 3 + offsetX, height.toFloat() / 3 + offsetY,
-                width.toFloat() / 2 + lineWidth / 2.828f + offsetX,
-                width.toFloat() / 2 + lineWidth / 2.828f + offsetY, paint)
-            canvas?.drawLine(width.toFloat() / 2 + offsetX, height.toFloat() / 2 + offsetY,
-                width.toFloat() / 4 * 3 + offsetX, width.toFloat() / 4 + offsetY, paint)
+            canvas?.drawLine(diameter.toFloat() / 3 + offsetX, diameter.toFloat() / 3 + offsetY,
+                diameter.toFloat() / 2 + lineWidth / 2.828f + offsetX,
+                diameter.toFloat() / 2 + lineWidth / 2.828f + offsetY, paint)
+            canvas?.drawLine(diameter.toFloat() / 2 + offsetX, diameter.toFloat() / 2 + offsetY,
+                diameter.toFloat() / 4 * 3 + offsetX, diameter.toFloat() / 4 + offsetY, paint)
         }
     }
 
+    /**
+     * 测量控件大小
+     * @param widthMeasureSpec widthMeasureSpec
+     * @param heightMeasureSpec heightMeasureSpec
+     */
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        setMeasuredDimension(measureSize(widthMeasureSpec), measureSize(heightMeasureSpec))
+    }
+
+    /**
+     * 测量大小
+     * @param measureSpec measureSpec
+     * @return 测量结果
+     */
+    private fun measureSize(measureSpec: Int): Int {
+        val specMode = MeasureSpec.getMode(measureSpec)
+        val specSize = MeasureSpec.getSize(measureSpec)
+        return (if (specMode == MeasureSpec.EXACTLY) specSize
+                else (context.resources.displayMetrics.density * 50).toInt())
+    }
 }

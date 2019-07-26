@@ -24,7 +24,7 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
 
     private var selectColor: Int = 0                                /* 被选中的颜色 */
 
-    private var colors: ArrayList<Int> = arrayListOf(0, 0, 0, 0)    /* 副视图颜色 */
+    private lateinit var colors: Array<Int>                         /* 副视图颜色 */
 
     private var onColorSelectListener: ((color: Int)-> Unit)? = null    /* 监听 */
 
@@ -52,9 +52,18 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
 
     constructor(builder: Builder): this(builder.context, builder.getTheme()) {
         this.onColorSelectListener = builder.getOnColorSelectListener()
-        this.selectColor = builder.getColor()
+        this.selectColor = builder.getSelectedColor()
         if (builder.getColors().isNotEmpty()) {
             setColors(builder.getColors())
+        }
+        if (builder.getColumns() > 0) {
+            colorPickerMain.numColumns = builder.getColumns()
+            colorPickerSub.numColumns = builder.getColumns()
+            colorPickerMain.setWidthWrapContent()
+            colorPickerSub.setWidthWrapContent()
+            colors = Array(builder.getColumns(), init = {0})
+        } else {
+            colors = Array(4, init = {0})
         }
         freshColorPickerSub(selectColor, colors.size)
         colorPickerSub.selectedItem = colors.size - 1
@@ -105,7 +114,7 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
                     + (stepG * (level - i - 1)).shl(8)
                     + (stepB * (level - i - 1)))
         }
-        colorPickerSub.setColors(colors)
+        colorPickerSub.setColors(colors.toList() as ArrayList<Int>)
     }
 
     /**
@@ -127,40 +136,73 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
     class Builder(var context: Context) {
         private var theme = R.style.ColorPickerDialogTheme
         private var onColorSelectListener: ((color: Int)-> Unit)? = null
-        private var color = 0
+        private var selectedColor = 0
         private var colors = arrayListOf<Int>()
+        private var columns = 0
 
+        /**
+         * 设置对话框主题
+         * @param theme 主题
+         */
         fun setTheme(theme: Int): Builder {
             this.theme = theme
             return this
         }
 
+        /**
+         * 获取对话框主题
+         * @return 主题
+         */
         fun getTheme(): Int {
             return theme
         }
 
+        /**
+         * 获取颜色选择监听
+         * @return 监听
+         */
         fun getOnColorSelectListener(): ((color: Int)-> Unit)? {
             return onColorSelectListener
         }
 
+        /**
+         * 设置颜色选择监听
+         * @param onColorSelectListener 监听
+         */
         fun setOnColorSelectListener(onColorSelectListener: ((color: Int)-> Unit)): Builder {
             this.onColorSelectListener = onColorSelectListener
             return this
         }
 
-        fun getColor(): Int {
-            return color
+        /**
+         * 获取被选择的颜色
+         * @return 被选择的颜色
+         */
+        fun getSelectedColor(): Int {
+            return selectedColor
         }
 
-        fun setColor(color: Int): Builder {
-            this.color = color
+        /**
+         * 设置被选择的颜色
+         * @param color 被选择的颜色
+         */
+        fun setSelectedColor(color: Int): Builder {
+            this.selectedColor = color
             return this
         }
 
+        /**
+         * 获取颜色资源List
+         * @return 颜色资源List
+         */
         fun getColors(): ArrayList<Int> {
             return colors
         }
 
+        /**
+         * 设置颜色资源List
+         * @param colorStrings 颜色资源
+         */
         fun setColors(colorStrings: Array<String>): Builder {
             for (colorString in colorStrings) {
                 colors.add(Color.parseColor(colorString))
@@ -168,11 +210,36 @@ class ColorPickerDialog(context: Context, theme: Int) : Dialog(context, theme),
             return this
         }
 
+        /**
+         * 设置颜色资源List
+         * @param colors 颜色资源
+         */
         fun setColors(colors: ArrayList<Int>): Builder {
             this.colors = colors
             return this
         }
 
+        /**
+         * 获取列数
+         * @return 列数
+         */
+        fun getColumns(): Int {
+            return columns
+        }
+
+        /**
+         * 设置列数
+         * @param columns 列数
+         */
+        fun setColumns(columns: Int): Builder {
+            this.columns = columns
+            return this
+        }
+
+        /**
+         * 创建对话框
+         * @return 对话框
+         */
         fun create(): ColorPickerDialog {
             return ColorPickerDialog(this)
         }

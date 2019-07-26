@@ -25,7 +25,6 @@ constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int, defS
             field = value
             (this.adapter?.getItem(value) as ColorPane).checked = true
         }
-    private var viewWidth = 0f
 
     var onColorClickListener: ((view: View, color: Int) -> Unit)? = null
 
@@ -44,14 +43,9 @@ constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int, defS
         val colorResourceId = attrArray.getResourceId(R.styleable.ColorPickerView_colorResource, 0)
 
         colorPaneSize = attrArray.getDimension(R.styleable.ColorPickerView_colorPaneSize, 0f)
-        val horizontalSpacing = attrArray.getDimension(R.styleable.ColorPickerView_horizontalSpacing, 0f)
-        val verticalSpacing = attrArray.getDimension(R.styleable.ColorPickerView_verticalSpacing, 0f)
-        val numColumns = attrArray.getInt(R.styleable.ColorPickerView_numColumns, 0)
         colorPaneStroke = attrArray.getColor(R.styleable.ColorPickerView_colorPaneStroke, 0)
 
         attrArray.recycle()
-
-        viewWidth = colorPaneSize * numColumns + horizontalSpacing * (numColumns - 1)
 
         if (colorResourceId != 0) {
             val colorStrings = context.resources.getStringArray(colorResourceId)
@@ -59,11 +53,6 @@ constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int, defS
         }
         this.onItemClickListener = this
         this.columnWidth = colorPaneSize.toInt()
-        this.horizontalSpacing = horizontalSpacing.toInt()
-        this.verticalSpacing = verticalSpacing.toInt()
-        if (numColumns != 0) {
-            this.numColumns = numColumns
-        }
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -105,6 +94,16 @@ constructor(context: Context, attrs: AttributeSet?=null, defStyleAttr: Int, defS
      * 设置View为宽度自适应
      */
     fun setWidthWrapContent() {
+        val cls = this.javaClass.superclass
+        var field = cls.getDeclaredField("mRequestedNumColumns")
+        field.isAccessible = true
+        val numColumns = field.getInt(this)
+
+        field = cls.getDeclaredField("mRequestedHorizontalSpacing")
+        field.isAccessible = true
+        val horizontalSpacing = field.getInt(this)
+
+        val viewWidth = colorPaneSize * numColumns + horizontalSpacing * (numColumns - 1)
         layoutParams = this.layoutParams
         layoutParams.width = viewWidth.toInt()
         this.layoutParams = layoutParams

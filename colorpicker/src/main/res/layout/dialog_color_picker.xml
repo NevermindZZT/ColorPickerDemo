@@ -20,9 +20,9 @@
             android:layout_height="wrap_content"
             app:colorPaneSize="50dp"
             app:colorPaneStroke="#F0F0F0"
-            app:horizontalSpacing="16dp"
-            app:numColumns="4"
-            app:verticalSpacing="8dp" />
+            android:horizontalSpacing="16dp"
+            android:numColumns="4"
+            android:verticalSpacing="8dp" />
 
     </LinearLayout>
 
@@ -50,9 +50,9 @@
             android:layout_height="wrap_content"
             app:colorPaneSize="50dp"
             app:colorPaneStroke="#F0F0F0"
-            app:horizontalSpacing="16dp"
-            app:numColumns="4"
-            app:verticalSpacing="8dp" />
+            android:horizontalSpacing="16dp"
+            android:numColumns="4"
+            android:verticalSpacing="8dp" />
 
     </LinearLayout>
 

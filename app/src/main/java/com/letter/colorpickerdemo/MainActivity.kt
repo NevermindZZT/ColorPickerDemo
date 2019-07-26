@@ -23,8 +23,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             button -> {
                 val dialog = ColorPickerDialog.Builder(this)
                     .setOnColorSelectListener{}
-                    .setColor(0)
+                    .setSelectedColor(0)
                     .setColors(resources.getStringArray(R.array.color_picker_values))
+                    .setColumns(5)
                     .create()
                 dialog.show()
             }
